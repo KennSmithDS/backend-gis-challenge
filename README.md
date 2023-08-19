@@ -32,6 +32,14 @@ Write a backend REST application with a single POST endpoint `/calculate_propert
 
 ## Environment Installation
 
+### Venv and Pip Install
+
+
+
+### Conda Install
+
+*NOTE:* This is the installlation method I used.
+
 Assuming someone already has conda (either Anaconda or Miniconda) installed on their local machine, the simplest way to replicate the environment used for this geospatial backend development test is to use the `environment.yml` file provided in the root directory of this repository. The environment can be created with all necessary packages installed by running the following command:
 
 `conda env create -f environment.yml`
