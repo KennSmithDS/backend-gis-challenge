@@ -29,3 +29,27 @@ Write a backend REST application with a single POST endpoint `/calculate_propert
   - Automated Testing
   
 **Suggested completion time is 1-4 hours.**
+
+## Environment Installation
+
+Assuming someone already has conda (either Anaconda or Miniconda) installed on their local machine, the simplest way to replicate the environment used for this geospatial backend development test is to use the `environment.yml` file provided in the root directory of this repository. The environment can be created with all necessary packages installed by running the following command:
+
+`conda env create -f environment.yml`
+
+**NOTE:** a similar virtual environment could be configured manually using pip or conda. For example, one can first install [Miniconda](https://docs.conda.io/en/latest/miniconda.html) using their installation instructions for either Windows, Mac or Linux machines. Then with conda installed, run these commands to create an environment and install the packages:
+
+1. Create a conda virtual environment:
+`conda create -n backend-test`
+
+2. Activate the virtual environment:
+`conda activate backend-test`
+
+3. Install required packages:
+`conda install -c conda-forge pydantic pytest geopandas fastapi uvicorn`
+
+## Application Execution
+
+
+
+## Automated Tests
+
