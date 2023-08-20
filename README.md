@@ -85,4 +85,11 @@ Assuming someone already has conda (either Anaconda or Miniconda) installed on t
 ## Automated Tests
 
 
+
 ## Future Considerations
+
+* More robust object validation
+* Unit tests for more edge cases
+* Dynamic handling of CRS inputs/outputs
+* Implementation of asynchronous API methods
+* Determine other ways to optimize calculations
