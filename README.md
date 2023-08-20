@@ -3,6 +3,14 @@ A simple coding challenge for Geospatial backend development using GeoJSON
 
 - https://geojson.org/
 
+## Table of Contents
+1. [Requirements](#requirements)
+2. [Evaluation](#how-the-challenge-will-be-evaluated)
+3. [Environment Installation](#environment-installation)
+4. [Application Execution](#application-execution)
+5. [Automated Tests](#automated-tests)
+6. [Future Considerations](#future-considerations)
+
 ## Requirements
 
 Write a backend REST application with a single POST endpoint `/calculate_properties` to calculate Geojson Feature properties and return them to the user.  
@@ -80,7 +88,7 @@ Assuming someone already has conda (either Anaconda or Miniconda) installed on t
 
 The application that runs the FastAPI server is located in the `app` folder, driven by the `main.py` script. In the installation setup you installed a package called `uvicorn` which is an ASGI web server implementation to host the API. In a terminal or command line with the virtual environment (above) activated, change the active directory to `app` and execute this line:
 
-`uvicorn main:app --reload`
+`uvicorn main:app`
 
 If everything was successful, then the server process will start in the background, with the API hosted at the localhost address `http://127.0.0.1:8000`. The port number and other server configurations all happen with `uvicorn` so these can be changed. You should see the following output:
 
@@ -299,7 +307,18 @@ ppp.pprint(server_response.json())
 
 ## Automated Tests
 
+I chose to use the `pytest` library to run automated code testing for this exercise. To execute the automated tests, follow these steps:
 
+1. Make sure that the FastAPI + Uvicorn server is running on localhost
+2. Open a new terminal and navigate to the parent/root project directory
+    <br>`/{your}/{cloned}/{repo}/backend-gis-challenge/`
+3. Activate the `venv` virutal environment created
+4. Run the verbose version of this command to see the coverage and test results:
+    <br>`pytest -v`
+
+![PyTest Results](./img/pytest_output_screenshot.png)
+
+**NOTE:** I had to run the server and the unit tests using the `venv` environment created from the `pip install` process because of an error with the Conda install caused by `uvicorn` not being located in the same directory as the server execution. Thus, the simple fix was to deploy with the `venv` active instead of `backend-test` Conda environment activate.
 
 ## Future Considerations
 

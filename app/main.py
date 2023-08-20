@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from typing import Dict
 from copy import deepcopy
-from models import RequestBody, ResponseBody
-from geo_utils import *
+from .models import RequestBody, ResponseBody
+from .geo_utils import *
 
 app = FastAPI()
 
