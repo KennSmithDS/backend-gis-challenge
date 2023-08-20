@@ -4,6 +4,7 @@ from shapely.ops import transform
 from pydantic import ValidationError
 from pyproj.transformer import Transformer
 from typing import Any, Dict, List, Optional, Union
+from .exceptions import InvalidGeoJSON, UnsupportedGeometryType, InvalidGeometry
 
 def validate_feature(request_payload: Dict[str, Any]) -> bool:
     """Helper method to validate if a request payload is a GeoJSON Feature, and if the geometry type is Polygon or MultiPolygon.
@@ -16,7 +17,9 @@ def validate_feature(request_payload: Dict[str, Any]) -> bool:
         bool: True if the object is a valid GeoJSON Feature and is either Polygon or MultiPolygon type.
     
     Raises:
-        ValidationError: error when the request payload is not a valid GeoJSON Feature object or accepted shape types.
+        InvalidGeoJSON: HTTPException error raised when request body is not a valid GeoJSON Feature.
+        UnsupportedGeometryType: HTTPException error raised when the GeoJSON Feature is not a Polygon or MultiPolygon
+        InvalidGeometry: HTTPException error raised when the GeoJSON Feature geometry is not a Polygon or MultiPolygon
     """
     
     try:
@@ -41,13 +44,17 @@ def validate_feature(request_payload: Dict[str, Any]) -> bool:
     
     # If request payload is not a valid GeoJSON Feature
     except ValidationError as ve:
-        print(f'Request payload is not a valid GeoJSON Feature or accepted type, only Polygon and Multipolygon are accepted types.')
-        return False
+        raise InvalidGeoJSON(
+            status_code=400,
+            detail="Request payload is not a valid GeoJSON Feature."
+        )
     
     # If not Feature is neither Polygon nor MultiPolygon type, return False
     except AssertionError as ae:
-        print(f'GeoJSON Feature type is not supported by the API, only Polygon and Multipolygon are accepted types.')
-        return False
+        raise UnsupportedGeometryType(
+            status_code=400,
+            detail="GeoJSON Feature type is not supported by the API, only Polygon and Multipolygon are accepted types."
+        )
 
 def is_polygon(geometry: Dict[str, Any]) -> bool:
     """Helper function to validate Feature is a Polygon.
@@ -62,8 +69,10 @@ def is_polygon(geometry: Dict[str, Any]) -> bool:
     try:
         return isinstance(Polygon(**geometry), Polygon)
     except ValidationError as ve:
-        print(f'GeoJSON Feature is not a valid Polygon object.')
-        return False
+        raise InvalidGeometry(
+            status_code=400,
+            detail="GeoJSON Feature geometry object is not a valid Polygon object."
+        )
 
 def is_multipolygon(geometry: Dict[str, Any]) -> bool:
     """Helper function to validate Feature is a MultiPolygon.
@@ -78,8 +87,10 @@ def is_multipolygon(geometry: Dict[str, Any]) -> bool:
     try:
         return isinstance(MultiPolygon(**geometry), MultiPolygon)
     except ValidationError as ve:
-        print(f'GeoJSON Feature is not a valid MultiPolygon object.')
-        return False
+        raise InvalidGeometry(
+            status_code=400,
+            detail="GeoJSON Feature geometry object is not a valid MultiPolygon object."
+        )
 
 def get_shapely_geometry(feature_geometry: Dict[str, Any]) -> Union[polygon.Polygon, multipolygon.MultiPolygon]:
     """Helper function to convert the GeoJSON Feature geometry property to a shapely object.
@@ -105,7 +116,7 @@ def transform_projection(
     input_geometry: Union[polygon.Polygon, multipolygon.MultiPolygon],
     input_crs: Optional[str] = '4326', # WGS 84 lat/long
     output_crs: Optional[str] = '3857' # Web Mercator
-) -> Dict[str, Any]:
+) -> Union[polygon.Polygon, multipolygon.MultiPolygon]:
     """Method to transform the projection of the input geometry from request payload to another CRS. 
     Assumption is made that the input CRS is in latitude and longitude coordinates in EPSG 4326 by default, 
     and the output needs to be transformed to Web Mercator EPSG 3857 which is a meter based projection.
@@ -115,7 +126,7 @@ def transform_projection(
         input_crs str: string value of the input CRS
         output_crs str: string value of the output CRS
     Returns:
-
+        output_geometry Union[polygon.Polygon, multipolygon.MultiPolygon]
     """
     # Instantiate the pyproj transformer
     geometry_transformer = Transformer.from_crs(

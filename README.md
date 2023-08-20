@@ -60,7 +60,7 @@ Then, you will need to create a virtual environment to install the appropriate l
 Now that the virtual environment is active, you can install the required dependencies one of two ways:
 
 1. Manually install using the `pip install` command for each library:
-`pip install fastapi uvicorn geojson-pydantic pytest geopandas`
+`pip install fastapi uvicorn geojson-pydantic pytest geopandas httpx pytest-cov`
 
 2. Use the provided `requirements.txt` file which will do the same thing:
 `pip install -r requirements.txt`
@@ -82,18 +82,18 @@ Assuming someone already has conda (either Anaconda or Miniconda) installed on t
 `conda activate backend-test`
 
 3. Install required packages:
-`conda install -c conda-forge pydantic pytest geopandas fastapi uvicorn geojson-pydantic`
+`conda install -c conda-forge pydantic pytest geopandas fastapi uvicorn geojson-pydantic httpx pytest-cov`
 
 ## Application Execution
 
-The application that runs the FastAPI server is located in the `app` folder, driven by the `main.py` script. In the installation setup you installed a package called `uvicorn` which is an ASGI web server implementation to host the API. In a terminal or command line with the virtual environment (above) activated, change the active directory to `app` and execute this line:
+The application that runs the FastAPI server is located in the root directory, driven by the `main.py` script. In the installation setup you installed a package called `uvicorn` which is an ASGI web server implementation to host the API. In a terminal or command line with the virtual environment (above) activated, execute this line:
 
 `uvicorn main:app`
 
 If everything was successful, then the server process will start in the background, with the API hosted at the localhost address `http://127.0.0.1:8000`. The port number and other server configurations all happen with `uvicorn` so these can be changed. You should see the following output:
 
 ```bash
-INFO:     Will watch for changes in these directories: ['/{your}/{cloned}/{repo}/backend-gis-challenge/app']
+INFO:     Will watch for changes in these directories: ['/{your}/{cloned}/{repo}/backend-gis-challenge']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 INFO:     Started reloader process [108764] using StatReload
 INFO:     Started server process [108766]
@@ -307,6 +307,8 @@ ppp.pprint(server_response.json())
 
 ## Automated Tests
 
+**NOTE:** I had to run the server and the unit tests using the `venv` environment created from the `pip install` process because of an error with the Conda install caused by `uvicorn` not being located in the same directory as the server execution. Thus, the simple fix was to deploy with the `venv` active instead of `backend-test` Conda environment activate.
+
 I chose to use the `pytest` library to run automated code testing for this exercise. To execute the automated tests, follow these steps:
 
 1. Make sure that the FastAPI + Uvicorn server is running on localhost
@@ -316,14 +318,19 @@ I chose to use the `pytest` library to run automated code testing for this exerc
 4. Run the verbose version of this command to see the coverage and test results:
     <br>`pytest -v`
 
-![PyTest Results](./img/pytest_output_screenshot.png)
+![PyTest Results](./img/pytest_screenshot.png)
 
-**NOTE:** I had to run the server and the unit tests using the `venv` environment created from the `pip install` process because of an error with the Conda install caused by `uvicorn` not being located in the same directory as the server execution. Thus, the simple fix was to deploy with the `venv` active instead of `backend-test` Conda environment activate.
+5. Lastly you can run the unit tests with the code coverage provided:
+    <br> `pytest --cov=src`
+
+![Pytest with Coverage Results](./img/pytest_cov_screenshot.png)
 
 ## Future Considerations
 
-* More robust object validation
-* Unit tests for more edge cases
-* Dynamic handling of CRS inputs/outputs
-* Implementation of asynchronous API methods
-* Determine other ways to optimize calculations
+* More robust object validation and HTTP exception handling using FastAPI decoration and custom responses.
+* Building unit tests to cover more edge cases for invalid request bodies, especially for GeoJSON formatting and types.
+* Integrate dynamic handling of CRS inputs/outputs, checking if GeoJSON Feature has the CRS object available, etc.
+* Diverse custom object types for validation using pydantic and geojson-pydantic libraries.
+* Possible implementation of asynchronous API methods by adding `async` and `wait` calls in the defined server methods.
+* Determine ways to optimize calculations if necessary to speed up the performance of the application.
+* Use of Python language linting tools to ensure the code formatting and styling is consistent across the entire application code base, and useability for other developers.

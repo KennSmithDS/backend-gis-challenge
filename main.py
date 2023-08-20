@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from typing import Dict
 from copy import deepcopy
-from .models import RequestBody, ResponseBody
-from .geo_utils import *
+from src.models import RequestBody, ResponseBody
+from src.geo_utils import *
+from src.exceptions import InvalidGeoJSON, UnsupportedGeometryType
 
 app = FastAPI()
 
@@ -23,9 +24,9 @@ def calculate_properties(request_body: Dict[str, Any]):
     """
 
     Parameters:
-        RequestBody: 
+        request_body Dict[str, Any]: A dictionary request body from the client.
     Returns:
-        ResponseBody: 
+        ResponseBody: A pydantic model type with expected new properties for response body.
     """
     # Validate the request body as GeoJSON Feature
     if validate_feature(request_body):
@@ -59,5 +60,9 @@ def calculate_properties(request_body: Dict[str, Any]):
 
         # return the response body
         return valid_response_body
-
+    else:
+        raise InvalidGeoJSON(
+            status_code=400,
+            detail='Request body is not a valid GeoJSON Feature.'
+            )
         
