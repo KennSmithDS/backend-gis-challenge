@@ -78,9 +78,224 @@ Assuming someone already has conda (either Anaconda or Miniconda) installed on t
 
 ## Application Execution
 
+The application that runs the FastAPI server is located in the `app` folder, driven by the `main.py` script. In the installation setup you installed a package called `uvicorn` which is an ASGI web server implementation to host the API. In a terminal or command line with the virtual environment (above) activated, change the active directory to `app` and execute this line:
+
 `uvicorn main:app --reload`
 
+If everything was successful, then the server process will start in the background, with the API hosted at the localhost address `http://127.0.0.1:8000`. The port number and other server configurations all happen with `uvicorn` so these can be changed. You should see the following output:
+
+```bash
+INFO:     Will watch for changes in these directories: ['/{your}/{cloned}/{repo}/backend-gis-challenge/app']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [108764] using StatReload
+INFO:     Started server process [108766]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:47262 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47262 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47262 - "GET /openapi.json HTTP/1.1" 200 OK
+```
+
+There are multiple ways to test that this server is working on the local machine. The easiest is to use the FastAPI Documentation automatically generated for the server, but the API can obviously be accessed through other programmatic means, e.g. CURL, Python, JS, etc.
+
+### FastAPI Docs
+
+1. While the server is running, open a web browser and navigate to the following URL:
+
 `http://127.0.0.1:8000/docs`
+
+2. First expand the green panel for the `POST` method `/calculate_properties`. Then find the `Try it out` button located on the right side. This will reveal a text box with which you can enter a GeoJSON request body to test against the API. For example, you could enter the GeoJSON provided below, and then click on `Execute`
+
+```json
+{
+  "type": "Feature",
+  "properties": {},
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          -112.05258456774443,
+          35.01411137365342
+        ],
+        [
+          -104.97678474499669,
+          35.01411137365342
+        ],
+        [
+          -104.97678474499669,
+          37.835415616424115
+        ],
+        [
+          -112.05258456774443,
+          37.835415616424115
+        ],
+        [
+          -112.05258456774443,
+          35.01411137365342
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  }
+}
+```
+
+3. Scroll down to where you see the response with status code 200, indicating a successful response from the server. The response body with the newly generated properties (`bbox`, `area`, and `centroid`) should look something like the following:
+
+```json
+{
+  "type": "Feature",
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          -112.05258456774443,
+          35.01411137365342
+        ],
+        [
+          -104.97678474499669,
+          35.01411137365342
+        ],
+        [
+          -104.97678474499669,
+          37.835415616424115
+        ],
+        [
+          -112.05258456774443,
+          37.835415616424115
+        ],
+        [
+          -112.05258456774443,
+          35.01411137365342
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  },
+  "properties": {
+    "area": {
+      "value": 307510138588.7445,
+      "unit": "sq meters"
+    },
+    "centroid": {
+      "type": "Point",
+      "coordinates": [
+        -108.51468465637058,
+        36.42476349503877
+      ]
+    }
+  },
+  "bbox": [
+    -112.05258456774443,
+    35.01411137365342,
+    -104.97678474499669,
+    37.835415616424115
+  ]
+}
+```
+
+The coordinates chosen for the example request and response above are significant because they encapsulate the entire Navajo Nation, and the four sacred mountains within the Navajo (or Diné) tradition, which is a territory of 307,510,138,588 square meters, or 307,510 square kilometers!
+
+![](./img/map_sacred_mountains_bg.jpg)
+
+[Source: The Four Sacred Mountains of the Navajo (Diné)](https://decolonialatlas.wordpress.com/2015/02/22/the-four-sacred-mountains-of-the-navajo/)
+
+### CURL
+
+Another simple means of testing the server response is to send a request body using a CURL command as shown below:
+
+```bash
+curl -X 'POST' \
+  'http://127.0.0.1:8000/calculate_properties' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "type": "Feature",
+  "properties": {},
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          -112.05258456774443,
+          35.01411137365342
+        ],
+        [
+          -104.97678474499669,
+          35.01411137365342
+        ],
+        [
+          -104.97678474499669,
+          37.835415616424115
+        ],
+        [
+          -112.05258456774443,
+          37.835415616424115
+        ],
+        [
+          -112.05258456774443,
+          35.01411137365342
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  }
+}'
+```
+
+### Other
+
+Lastly, there are infinite ways to work with an API programatically depending on your programming language of choice. Here I will provide a simple Python script that uses the `requests` library to pass the request body to the server, and the corresponding response body:
+
+```python
+import json, requests
+from pprint import PrettyPrinter
+ppp = PrettyPrinter(indent=2)
+
+api_url = 'http://127.0.0.1:8000/calculate_properties'
+
+request_json = {
+  "type": "Feature",
+  "properties": {},
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          -112.05258456774443,
+          35.01411137365342
+        ],
+        [
+          -104.97678474499669,
+          35.01411137365342
+        ],
+        [
+          -104.97678474499669,
+          37.835415616424115
+        ],
+        [
+          -112.05258456774443,
+          37.835415616424115
+        ],
+        [
+          -112.05258456774443,
+          35.01411137365342
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  }
+}
+request_data = json.dumps(request_json)
+
+server_response = requests.post(
+    api_url,
+    data=request_data,
+    headers={"Content-Type": "application/json"}
+)
+
+print(server_response.status_code)
+
+ppp.pprint(server_response.json())
+```
 
 ## Automated Tests
 
